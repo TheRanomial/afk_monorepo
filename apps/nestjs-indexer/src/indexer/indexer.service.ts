@@ -92,12 +92,16 @@ export class IndexerService {
 
   private async handleDataMessage(dataMessage: any) {
     const { data } = dataMessage;
-    let hash = '0x';
+    let latestBlock = null;
+    let latestHash = '0x';
+
     for (const item of data) {
       const block = starknet.Block.decode(item);
+      latestBlock = block;
+      this.logger.log('blockHashis', block.header.blockHash);
+
       for (const event of block.events) {
         const eventKey = FieldElement.toHex(event.event.keys[0]);
-
         const matchingConfigs = this.configs.filter((config) =>
           config.eventKeys.includes(eventKey),
         );
@@ -105,16 +109,19 @@ export class IndexerService {
         for (const config of matchingConfigs) {
           await config.handler(block.header, event.event, event.transaction);
         }
-        if (event.receipt.transactionHash)
-          hash = FieldElement.toHex(event.receipt.transactionHash);
+        if (event.receipt.transactionHash) {
+          latestHash = FieldElement.toHex(event.receipt.transactionHash);
+        }
       }
+    }
 
+    if (latestBlock) {
       await prisma.indexerStats.create({
         data: {
-          lastBlockScraped: Number(block.header.blockNumber),
-          lastTx: hash,
+          lastBlockScraped: Number(latestBlock.header.blockNumber),
+          lastTx: latestHash,
           lastTimestamp: new Date(
-            Number(block.header.timestamp.seconds) * 1000,
+            Number(latestBlock.header.timestamp.seconds) * 1000,
           ),
         },
       });

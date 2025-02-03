@@ -60,29 +60,29 @@ export class BuyTokenIndexer {
         blockHash: blockHashFelt,
         timestamp: blockTimestamp,
       } = header;
-  
+
       const blockHash = validateAndParseAddress(
         `0x${FieldElement.toBigInt(blockHashFelt).toString(16)}`,
       ) as ContractAddress;
-  
+
       const transactionHashFelt = transaction.meta.hash;
       const transactionHash = validateAndParseAddress(
         `0x${FieldElement.toBigInt(transactionHashFelt).toString(16)}`,
       ) as ContractAddress;
-  
+
       const transferId = `${transactionHash}_${event.index}`;
-  
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, callerFelt, tokenAddressFelt] = event.keys;
-  
+
       const ownerAddress = validateAndParseAddress(
         `0x${FieldElement.toBigInt(callerFelt).toString(16)}`,
       ) as ContractAddress;
-  
+
       const tokenAddress = validateAndParseAddress(
         `0x${FieldElement.toBigInt(tokenAddressFelt).toString(16)}`,
       ) as ContractAddress;
-  
+
       const [
         amountLow,
         amountHigh,
@@ -96,19 +96,19 @@ export class BuyTokenIndexer {
         quoteAmountLow,
         quoteAmountHigh,
       ] = event.data;
-  
+
       const amountRaw = uint256.uint256ToBN({
         low: FieldElement.toBigInt(amountLow),
         high: FieldElement.toBigInt(amountHigh),
       });
       const amount = formatUnits(amountRaw, constants.DECIMALS).toString();
-  
+
       const priceRaw = uint256.uint256ToBN({
         low: FieldElement.toBigInt(priceLow),
         high: FieldElement.toBigInt(priceHigh),
       });
       const price = formatUnits(priceRaw, constants.DECIMALS);
-  
+
       const protocolFeeRaw = uint256.uint256ToBN({
         low: FieldElement.toBigInt(protocolFeeLow),
         high: FieldElement.toBigInt(protocolFeeHigh),
@@ -117,13 +117,16 @@ export class BuyTokenIndexer {
         protocolFeeRaw,
         constants.DECIMALS,
       ).toString();
-  
+
       const lastPriceRaw = uint256.uint256ToBN({
         low: FieldElement.toBigInt(lastPriceLow),
         high: FieldElement.toBigInt(lastPriceHigh),
       });
-      const lastPrice = formatUnits(lastPriceRaw, constants.DECIMALS).toString();
-  
+      const lastPrice = formatUnits(
+        lastPriceRaw,
+        constants.DECIMALS,
+      ).toString();
+
       const quoteAmountRaw = uint256.uint256ToBN({
         low: FieldElement.toBigInt(quoteAmountLow),
         high: FieldElement.toBigInt(quoteAmountHigh),
@@ -132,11 +135,11 @@ export class BuyTokenIndexer {
         quoteAmountRaw,
         constants.DECIMALS,
       ).toString();
-  
+
       const timestamp = new Date(
         Number(FieldElement.toBigInt(timestampFelt)) * 1000,
       );
-  
+
       const data = {
         transferId,
         network: 'starknet-sepolia',
@@ -154,10 +157,10 @@ export class BuyTokenIndexer {
         timestamp,
         transactionType: 'buy',
       };
-  
+
       await this.buyTokenService.create(data);
     } catch (error) {
-      console.log("Error BuyTokenIndexer", error)
+      console.log('Error BuyTokenIndexer', error);
     }
   }
 }
