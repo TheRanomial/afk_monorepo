@@ -1,11 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SellToken } from './interfaces';
+import { CandlestickService } from 'src/services/candlestick/candlesticks.service';
 
 @Injectable()
 export class SellTokenService {
   private readonly logger = new Logger(SellTokenService.name);
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly candlestickService: CandlestickService,
+  ) {}
 
   async create(data: SellToken) {
     try {
@@ -20,7 +24,6 @@ export class SellTokenService {
         );
         return;
       }
-
 
       const tokenLaunchRecord = await this.prismaService.token_launch.findFirst(
         { where: { memecoin_address: data.memecoinAddress } },
@@ -62,18 +65,20 @@ export class SellTokenService {
           newTotalTokenHolded = 0;
         }
 
-        const initPoolSupply = Number(tokenLaunchRecord?.initial_pool_supply_dex ?? 0);
-        const liquidityInQuoteToken= Number(newLiquidityRaised);
+        const initPoolSupply = Number(
+          tokenLaunchRecord?.initial_pool_supply_dex ?? 0,
+        );
+        const liquidityInQuoteToken = Number(newLiquidityRaised);
         // const tokensInPool = Number(newTotalTokenHolded);
         const tokensInPool = Number(initPoolSupply);
         // Avoid division by zero
-        let priceHere = tokensInPool > 0 ? tokensInPool / liquidityInQuoteToken : 0; // Price in memecoin per ETH
+        let priceHere =
+          tokensInPool > 0 ? tokensInPool / liquidityInQuoteToken : 0; // Price in memecoin per ETH
 
         if (priceHere < 0) {
           priceHere = 0;
         }
-        price = priceHere
-
+        price = priceHere;
 
         await this.prismaService.token_launch.update({
           where: { transaction_hash: tokenLaunchRecord.transaction_hash },
@@ -81,7 +86,7 @@ export class SellTokenService {
             current_supply: newSupply.toString(),
             liquidity_raised: newLiquidityRaised.toString(),
             total_token_holded: newTotalTokenHolded.toString(),
-            price:price?.toString()
+            price: price?.toString(),
           },
         });
       }
@@ -153,6 +158,8 @@ export class SellTokenService {
           transaction_type: data.transactionType,
         },
       });
+
+      await this.candlestickService.generateCandles(data.memecoinAddress, 20);
     } catch (error) {
       this.logger.error(
         `Error creating buy token record: ${error.message}`,

@@ -14,6 +14,7 @@ import { LiquidityAddedModule } from 'src/services/liquidity-added/liquidity-add
 import { LiquidityAddedIndexer } from './liquidity-added.indexer';
 import { TipServiceModule } from '../services/tip-service/tipServiceModule';
 import { TipServiceIndexer } from './tip-service.indexer';
+import { CandleSticksModule } from 'src/services/candlestick/candlesticks.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TipServiceIndexer } from './tip-service.indexer';
     DeployTokenModule,
     BuyTokenModule,
     SellTokenModule,
+    CandleSticksModule,
     NameServiceModule,
     LiquidityAddedModule,
     TipServiceModule,
@@ -30,6 +32,7 @@ import { TipServiceIndexer } from './tip-service.indexer';
     DeployTokenIndexer,
     BuyTokenIndexer,
     SellTokenIndexer,
+    CandleSticksModule,
     NameServiceIndexer,
     IndexerService,
     LiquidityAddedIndexer,
@@ -41,6 +44,7 @@ import { TipServiceIndexer } from './tip-service.indexer';
     BuyTokenIndexer,
     SellTokenIndexer,
     NameServiceIndexer,
+    CandleSticksModule,
     LiquidityAddedIndexer,
     TipServiceIndexer,
   ],
