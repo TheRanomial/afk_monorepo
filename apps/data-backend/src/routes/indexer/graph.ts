@@ -8,7 +8,6 @@ interface GraphParams {
 }
 
 async function graphRoute(fastify: FastifyInstance, options: RouteOptions) {
-
   fastify.get<{
     Params: GraphParams;
   }>('/get-candles/:tokenAddress', async (request, reply) => {
@@ -22,7 +21,7 @@ async function graphRoute(fastify: FastifyInstance, options: RouteOptions) {
     }
 
     try {
-      const transactions = await prisma.token_transactions.findMany({
+      /*const transactions = await prisma.token_transactions.findMany({
         where: { memecoin_address: tokenAddress },
         orderBy: { block_timestamp: 'asc' },
         select: {
@@ -50,7 +49,27 @@ async function graphRoute(fastify: FastifyInstance, options: RouteOptions) {
           acc[hour].close = price;
         }
         return acc;
-      }, {});
+      }, {});*/
+
+      const candles = await prisma.candlesticks.findMany({
+        where: {
+          token_address: tokenAddress,
+        },
+        orderBy: { timestamp: 'asc' },
+        select: {
+          open: true,
+          close: true,
+          high: true,
+          low: true,
+          timestamp: true,
+        },
+      });
+
+      if (candles.length === 0) {
+        return reply.status(HTTPStatus.NotFound).send({
+          error: 'No candle data found for this token address.',
+        });
+      }
 
       reply.status(HTTPStatus.OK).send(candles);
     } catch (error) {
