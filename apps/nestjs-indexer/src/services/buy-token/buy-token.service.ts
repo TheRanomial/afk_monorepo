@@ -31,9 +31,7 @@ export class BuyTokenService {
 
         let price = tokenLaunchRecord?.price ?? 0;
 
-        const calculatedQuoteAmount = Number(data.amount) * Number(price);
-        const effectiveQuoteAmount =
-          calculatedQuoteAmount - Number(data?.protocolFee);
+        const calculatedQuoteAmount = Number(data?.quoteAmount);
 
         if (!tokenLaunchRecord) {
           this.logger.warn(
@@ -46,7 +44,8 @@ export class BuyTokenService {
           Number(tokenLaunchRecord.current_supply ?? 0) - Number(data.amount);
         let newLiquidityRaised =
           Number(tokenLaunchRecord.liquidity_raised ?? 0) +
-          effectiveQuoteAmount;
+          calculatedQuoteAmount -
+          Number(data?.protocolFee);
 
         if (newSupply < 0) {
           this.logger.warn(

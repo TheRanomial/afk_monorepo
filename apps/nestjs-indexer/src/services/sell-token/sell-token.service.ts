@@ -42,9 +42,6 @@ export class SellTokenService {
 
       const calculatedQuoteAmount = Number(data.amount) * Number(price);
 
-      const effectiveQuoteAmount =
-        calculatedQuoteAmount - Number(data?.protocolFee);
-
       if (!tokenLaunchRecord) {
         this.logger.warn(
           `Record with memecoin address ${data.memecoinAddress} doesn't exists`,
@@ -54,7 +51,8 @@ export class SellTokenService {
           Number(tokenLaunchRecord.current_supply ?? 0) + Number(data.amount);
         let newLiquidityRaised =
           Number(tokenLaunchRecord.liquidity_raised ?? 0) -
-          effectiveQuoteAmount;
+          calculatedQuoteAmount -
+          Number(data?.protocolFee);
 
         const maxLiquidityRaised = tokenLaunchRecord?.threshold_liquidity;
 

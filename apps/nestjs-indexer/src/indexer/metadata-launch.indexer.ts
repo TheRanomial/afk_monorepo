@@ -36,7 +36,7 @@ export class MetadataLaunchIndexer {
   };
 
   private cleanString = (str: string): string => {
-    console.log("str", str);
+
     return str
       .split('')
       .filter((char) => this.isValidChar(char))
@@ -46,7 +46,7 @@ export class MetadataLaunchIndexer {
 
 
   private isNumeric = (str: string): boolean => {
-    console.log("str", str);
+
     return /^\d+$/.test(str);
   };
 
@@ -79,7 +79,7 @@ export class MetadataLaunchIndexer {
       blockHash: blockHashFelt,
       timestamp: blockTimestamp,
     } = header;
-    console.log("handleMetadataEvent", event);
+    
 
     const blockHash = validateAndParseAddress(
       `0x${FieldElement.toBigInt(blockHashFelt).toString(16)}`,
@@ -125,7 +125,7 @@ export class MetadataLaunchIndexer {
       }
   
       url = this.cleanString(url);
-      console.log("url", url);     
+      
     } catch (error) {
       console.log("error bytearray", error);
     }
@@ -143,7 +143,7 @@ export class MetadataLaunchIndexer {
     } catch (error) {
       
     }
-    console.log("nostrEventId", nostrEventId);
+
     const timestamp = new Date(
       Number(FieldElement.toBigInt(timestampFelt)) * 1000,
     );
